@@ -1,0 +1,20 @@
+{
+  "evolutionary": {
+    "population": 100,
+    "mutation_rate": 0.4,
+    "timeout": 5,
+    "generations": 200
+  },
+  "hill_climbing": {
+    "max_stagnation": 10,
+    "n_iterations": 1000,
+    "perturbation_walks": 30,
+    "neighbor_type": 1
+  },
+  "annealing": {
+    "temperature": 1000,
+    "alpha": 0.95,
+    "max_stagnation": 30,
+    "reheats": 3
+  }
+}
