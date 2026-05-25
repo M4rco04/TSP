@@ -1,99 +1,112 @@
-# TSP Solver - Algorytmy Ewolucyjne i Przeszukiwanie Lokalne
+# TSP Solver - Evolutionary Algorithms and Local Search
 
-Projekt ten stanowi platformę do rozwiązywania problemu komiwojażera (Traveling Salesman Problem - TSP) przy użyciu trzech zaawansowanych metaheurystyk: **Algorytmu Ewolucyjnego**, **Symulowanego Wyżarzania** oraz **Wspinaczki Górskiej z Perturbacjami (Iterated Local Search)**. Program znajduje optymalną lub bliską optymalnej ścieżkę odwiedzającą wszystkie miasta w oparciu o macierz odległości.
+This project provides a platform for solving the Traveling Salesman Problem (TSP) using three advanced metaheuristics: **Evolutionary Algorithm**, **Simulated Annealing**, and **Hill Climbing with Perturbations (Iterated Local Search)**. The program finds the optimal or near-optimal path visiting all cities based on a distance matrix.
 
-## 📂 Struktura projektu
+## 📂 Project Structure
 
-Kod jest zorganizowany w sposób modułowy, co pozwala na łatwą wymianę operatorów i dodawanie nowych algorytmów:
+The code is organized in a modular way, allowing for easy swapping of operators and the addition of new algorithms:
 
-`main.py` – Główny skrypt sterujący procesem wczytywania danych i uruchamiania wszystkich trzech algorytmów.
+`main.py` – The main script controlling the process of loading data and running all three algorithms.
 
-`algorithm/` – Rdzeń obliczeniowy:
-* `evolutionary_algorithm.py` – Klasa zarządzająca cyklem ewolucyjnym.
-* `local_search.py` – Abstrakcyjna klasa bazowa dostarczająca wspólny interfejs i operatory (2-opt, 3-opt) dla metod przeszukiwania lokalnego.
-* `hill_climbing.py` – Zaawansowana implementacja wspinaczki górskiej (Iterated Local Search).
-* `annealing.py` – Implementacja symulowanego wyżarzania z mechanizmem ponownego podgrzewania.
+`algorithm/` – Computational core:
 
-`representation/` – Modele danych:
-* `individual.py` – Reprezentacja trasy (genomu).
-* `population.py` – Zarządzanie zbiorem osobników.
-* `problem.py` – Obsługa wczytywania macierzy odległości z plików CSV.
+* `evolutionary_algorithm.py` – Class managing the evolutionary cycle.
+* `local_search.py` – Abstract base class providing a common interface and operators (2-opt, 3-opt) for local search methods.
+* `hill_climbing.py` – Advanced implementation of hill climbing (Iterated Local Search).
+* `annealing.py` – Implementation of simulated annealing with a reheating mechanism.
 
-`genetic_operators/` – Logika modyfikacji rozwiązań (dla EA):
-* `selection.py` – Metody wyboru rodziców (turniejowa, ruletkowa).
-* `crossover.py` – Operatory krzyżowania (PMX, Order).
-* `mutation.py` – Operatory mutacji (Swap, Inversion).
+`representation/` – Data models:
 
-`fitness/` – Moduł oceny:
-* `fitness_function.py` – Obliczanie jakości rozwiązania (całkowitej długości trasy).
+* `individual.py` – Representation of the route (genome).
+* `population.py` – Management of the population of individuals.
+* `problem.py` – Handling distance matrix loading from CSV files.
 
----
+`genetic_operators/` – Logic for modifying solutions (for EA):
 
-## 🛠️ Użyte technologie i wzorce
+* `selection.py` – Parent selection methods (tournament, roulette wheel).
+* `crossover.py` – Crossover operators (PMX, Order).
+* `mutation.py` – Mutation operators (Swap, Inversion).
 
-* **Python 3.10+** – Wykorzystanie nowoczesnych mechanizmów języka, takich jak `Type Hints`, `Enums` oraz struktury `match/case` do zarządzania strategiami.
-* **LRU Cache** – Wykorzystany w klasie `FitnessFunction` w celu drastycznego przyspieszenia obliczeń poprzez zapamiętywanie wyników dla już sprawdzonych tras.
-* **Architektura zorientowana obiektowo (OOP)** – Wykorzystanie klas abstrakcyjnych (`ABC`) i dziedziczenia w celu unikania duplikacji kodu (DRY).
-* **Argparse** – Do profesjonalnej obsługi argumentów linii komend.
-* **JSON** – Standard przechowywania parametrów konfiguracyjnych wszystkich algorytmów.
+`fitness/` – Evaluation module:
+
+* `fitness_function.py` – Calculating solution quality (total route length).
 
 ---
 
-## 🧠 Działanie algorytmów
+## 🛠️ Technologies and Patterns Used
 
-### 1. Algorytm Ewolucyjny (EA)
-Algorytm symuluje proces doboru naturalnego:
-* **Inicjalizacja**: Tworzona jest losowa populacja osobników (tras).
-* **Selekcja**: Wybór najlepszych tras do reprodukcji, przy użyciu metody turniejowej lub ruletki.
-* **Krzyżowanie (Crossover)**: Łączenie cech dwóch tras (PMX, OX), aby stworzyć potomstwo dziedziczące dobre pod-trasy.
-* **Mutacja**: Losowe zmiany w trasie (Inwersja/Swap), zapobiegające utknięciu w optimach lokalnych.
-* **Elitaryzm**: Zachowanie 2 najlepszych znalezionych dotąd rozwiązań przy przejściu do nowej generacji.
-
-### 2. Wspinaczka Górska z Perturbacjami (Iterated Local Search)
-Zaawansowany algorytm stochastyczny badający sąsiedztwo rozwiązania:
-* **Sąsiedztwo 3-opt**: Algorytm ocenia 7 różnych kombinacji przepięcia krawędzi (w tym warianty redukujące się do 2-opt) dla wylosowanego cięcia trasy.
-* **Strategie Wyboru Sąsiada**: Zaimplementowano trzy podejścia wyboru:
-  * *FirstBest* – wybiera pierwszego lepszego sąsiada.
-  * *TheBest* – sprawdza wszystkich i wybiera obiektywnie najkrótszą trasę.
-  * *TheWorstBest* – wybiera trasę poprawiającą wynik, ale w najmniejszym możliwym stopniu.
-* **Perturbacje**: Jeśli algorytm utknie w optimum lokalnym (stagnacja), wykonuje serię silnych losowych ruchów (random walks), aby uciec z minimum lokalnego i wznowić wspinaczkę.
-
-### 3. Symulowane Wyżarzanie (SA)
-Metaheurystyka inspirowana procesem stygnięcia układów termodynamicznych:
-* **Operator 2-opt**: Szybki mechanizm odwracania losowego fragmentu trasy w celu usuwania skrzyżowań.
-* **Akceptacja Gorszych Rozwiązań**: Algorytm może przyjąć dłuższą trasę, by wyjść z minimum lokalnego. Szansa na to zależy od rozkładu Boltzmanna i aktualnej temperatury.
-* **Chłodzenie i Reheating**: Temperatura spada geometrycznie (współczynnik `alpha`). W przypadku długotrwałej stagnacji, algorytm używa mechanizmu "ponownego podgrzania" (`reheats`), aby na nowo zwiększyć eksplorację przestrzeni.
+* **Python 3.10+** – Utilizing modern language features such as `Type Hints`, `Enums`, and `match/case` structures for strategy management.
+* **LRU Cache** – Used in the `FitnessFunction` class to drastically speed up calculations by memorizing results for previously evaluated routes.
+* **Object-Oriented Programming (OOP)** – Using abstract classes (`ABC`) and inheritance to avoid code duplication (DRY principle).
+* **Argparse** – For professional command-line argument handling.
+* **JSON** – Standard for storing configuration parameters for all algorithms.
 
 ---
 
-## ⚙️ Konfiguracja (settings.json)
+## 🧠 How the Algorithms Work
 
-Wszystkie parametry sterujące znajdują się w pliku `settings.json`. Powinien on zawierać trzy główne sekcje:
+### 1. Evolutionary Algorithm (EA)
 
-| Parametr | Algorytm | Opis |
+The algorithm simulates the process of natural selection:
+
+* **Initialization**: A random population of individuals (routes) is created.
+* **Selection**: Choosing the best routes for reproduction using tournament or roulette wheel selection.
+* **Crossover**: Combining traits of two routes (PMX, OX) to create offspring that inherit good sub-routes.
+* **Mutation**: Random changes in the route (Inversion/Swap) to prevent getting stuck in local optima.
+* **Elitism**: Preserving the 2 best solutions found so far when transitioning to a new generation.
+
+### 2. Hill Climbing with Perturbations (Iterated Local Search)
+
+An advanced stochastic algorithm that explores the neighborhood of a solution:
+
+* **3-opt Neighborhood**: The algorithm evaluates 7 different combinations of edge reconnections (including variants that reduce to 2-opt) for a randomly selected route cut.
+* **Neighbor Selection Strategies**: Three selection approaches are implemented:
+* *FirstBest* – chooses the first improving neighbor.
+* *TheBest* – checks all neighbors and selects the objectively shortest route.
+* *TheWorstBest* – chooses a route that improves the result, but by the smallest possible margin.
+
+
+* **Perturbations**: If the algorithm gets stuck in a local optimum (stagnation), it executes a series of strong random moves (random walks) to escape the local minimum and resume climbing.
+
+### 3. Simulated Annealing (SA)
+
+A metaheuristic inspired by the cooling process of thermodynamic systems:
+
+* **2-opt Operator**: A fast mechanism for reversing a random segment of the route to remove intersections.
+* **Acceptance of Worse Solutions**: The algorithm can accept a longer route to escape a local minimum. The probability of this depends on the Boltzmann distribution and the current temperature.
+* **Cooling and Reheating**: The temperature drops geometrically (the `alpha` coefficient). In case of prolonged stagnation, the algorithm uses a "reheating" mechanism (`reheats`) to increase space exploration anew.
+
+---
+
+## ⚙️ Configuration (settings.json)
+
+All control parameters are located in the `settings.json` file. It should contain three main sections:
+
+| Parameter | Algorithm | Description |
 | --- | --- | --- |
-| `population` | EA | Rozmiar populacji w algorytmie ewolucyjnym |
-| `mutation_rate` | EA | Prawdopodobieństwo wystąpienia mutacji (np. 0.05) |
-| `timeout` | EA | Maksymalny czas trwania ewolucji w sekundach |
-| `generations` | EA | Limit pokoleń (jeśli czas nie zostanie przekroczony) |
-| `max_stagnation` | HC / SA | Liczba iteracji bez poprawy wyzwalająca perturbację (HC) lub podgrzanie (SA) |
-| `n_iterations` | HC | Główna liczba iteracji wspinaczki |
-| `perturbation_walks` | HC | Siła "kopnięcia" (liczba losowych ruchów 2-opt po stagnacji) |
-| `neighbor_type` | HC | Strategia wyboru (0 = FirstBest, 1 = TheBest, 2 = TheWorstBest) |
-| `temperature` | SA | Startowa temperatura dla wyżarzania |
-| `alpha` | SA | Współczynnik chłodzenia (zazwyczaj od 0.9 do 0.999) |
-| `reheats` | SA | Liczba dozwolonych "podgrzań" układu po osiągnięciu stagnacji |
+| `population` | EA | Population size in the evolutionary algorithm |
+| `mutation_rate` | EA | Probability of mutation occurrence (e.g., 0.05) |
+| `timeout` | EA | Maximum evolution time in seconds |
+| `generations` | EA | Generation limit (if time is not exceeded) |
+| `max_stagnation` | HC / SA | Number of iterations without improvement triggering perturbation (HC) or reheating (SA) |
+| `n_iterations` | HC | Main number of climbing iterations |
+| `perturbation_walks` | HC | "Kick" strength (number of random 2-opt moves after stagnation) |
+| `neighbor_type` | HC | Selection strategy (0 = FirstBest, 1 = TheBest, 2 = TheWorstBest) |
+| `temperature` | SA | Starting temperature for annealing |
+| `alpha` | SA | Cooling coefficient (typically between 0.9 and 0.999) |
+| `reheats` | SA | Number of allowed system "reheats" after reaching stagnation |
 
 ---
 
-## 🚀 Instrukcja uruchomienia
+## 🚀 Running Instructions
 
-1. Upewnij się, że Twoje pliki z danymi (macierze odległości w formacie CSV) znajdują się w folderze `problem/`.
-2. Skonfiguruj parametry w pliku `settings.json` w głównym katalogu projektu.
-3. Uruchom program z wiersza poleceń, podając nazwę pliku z danymi (wraz z rozszerzeniem):
+1. Ensure your data files (distance matrices in CSV format) are located in the `problem/` folder.
+2. Configure the parameters in the `settings.json` file in the main project directory.
+3. Run the program from the command line, providing the data file name (including the extension):
 
 ```bash
-python main.py -f nazwa_pliku.csv
+python main.py -f file_name.csv
+
 ```
 
-Program po zakończeniu wyświetli najlepszą znalezioną trasę oraz jej koszt (Fitness) sekwencyjnie dla każdego z trzech algorytmów, co pozwala na bezpośrednie porównanie ich skuteczności.
+Upon completion, the program will display the best route found and its cost (Fitness) sequentially for each of the three algorithms, allowing for a direct comparison of their effectiveness.
